@@ -10,9 +10,23 @@ const Users = ({ apiUrl }) => {
   })
 
   const getUsers = async () => {
-    const res = await fetch(apiUrl + '/users')
+    const token = localStorage.getItem('token') 
+
+    const res = await fetch(apiUrl + '/users', {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      }
+    })
+    
     const data = await res.json()
-    setUsers(data)
+    if (res.ok) {
+      setUsers(data)
+    } else {
+      console.error("Error al obtener usuarios:", data.msg)
+      setUsers([])
+    }
   }
 
   useEffect(() => {
@@ -25,7 +39,6 @@ const Users = ({ apiUrl }) => {
       [e.target.name]: e.target.value
     })
   }
-
   const addUser = async (e) => {
     e.preventDefault()
 
@@ -33,10 +46,13 @@ const Users = ({ apiUrl }) => {
       alert('Completa todos los campos')
       return
     }
-
+    const token = localStorage.getItem('token')
     const res = await fetch(apiUrl + '/users', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
       body: JSON.stringify(form)
     })
 
@@ -47,16 +63,24 @@ const Users = ({ apiUrl }) => {
         password: ''
       })
       getUsers()
+    } else {
+      const errorData = await res.json()
+      alert('Error al agregar usuario: ' + errorData.msg)
     }
   }
-
   const deleteUser = async (id) => {
+    const token = localStorage.getItem('token') 
     const res = await fetch(apiUrl + '/users/' + id, {
-      method: 'DELETE'
+      method: 'DELETE',
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
     })
 
     if (res.ok) {
       getUsers()
+    } else {
+      alert('No tienes permisos o el token expiró')
     }
   }
 
@@ -94,31 +118,35 @@ const Users = ({ apiUrl }) => {
           Agregar
         </Button>
       </Box>
-
       <Box sx={{ display: 'grid', gap: 2 }}>
-        {users.map((user) => (
-          <Paper
-            key={user._id}
-            sx={{
-              padding: 2,
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center'
-            }}
-          >
-            <Box>
-              <Typography variant="h6">{user.name}</Typography>
-              <Typography>Usuario: {user.username}</Typography>
-            </Box>
+        {users && users.length > 0 ? (
+          users.map((user) => (
+            <Paper
+              key={user._id}
+              sx={{
+                padding: 2,
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center'
+              }}
+            >
+              <Box>
+                <Typography variant="h6">{user.name}</Typography>
+                <Typography>Usuario: {user.username}</Typography>
+              </Box>
 
-            <Button color="error" variant="outlined" onClick={() => deleteUser(user._id)}>
-              Eliminar
-            </Button>
-          </Paper>
-        ))}
+              <Button color="error" variant="outlined" onClick={() => deleteUser(user._id)}>
+                Eliminar
+              </Button>
+            </Paper>
+          ))
+        ) : (
+          <Typography variant="body1" color="textSecondary">
+            No hay usuarios disponibles o no se han cargado los datos.
+          </Typography>
+        )}
       </Box>
     </Box>
   )
 }
-
 export default Users
