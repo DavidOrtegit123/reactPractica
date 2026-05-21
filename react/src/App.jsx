@@ -7,7 +7,7 @@ import ResponsiveAppBar from './components/AppBar'
 import { useEffect, useState } from 'react'
 
 //const API_URL = process.env.REACT_APP_API_URL || "http://localhost:8000"
-const API_URL = "davidapi.up.railway.app"
+const API_URL = "https://davidapi.up.railway.app"
 
 function App() {
   const [isLogin, setIsLogin] = useState(false)
