@@ -6,7 +6,6 @@ import Users from './views/Users'
 import ResponsiveAppBar from './components/AppBar'
 import { useEffect, useState } from 'react'
 
-//const API_URL = process.env.REACT_APP_API_URL || "http://localhost:8000"
 const API_URL = "https://davidapi.up.railway.app"
 
 function App() {
@@ -28,6 +27,7 @@ function App() {
       const res = await fetch(API_URL + "/login", { 
         method: "POST",
         headers: { "Content-Type": "application/json" }, 
+        body: JSON.stringify(userCredentials) 
       })
   
       const data = await res.json()
@@ -35,7 +35,7 @@ function App() {
       if (res.ok && data.login) {
         setIsLogin(true)
         setUser(data.user)
-                localStorage.setItem('user', JSON.stringify(data.user))
+        localStorage.setItem('user', JSON.stringify(data.user))
         localStorage.setItem('token', data.token) 
         
         return { isLogin: true, user: data.user }
